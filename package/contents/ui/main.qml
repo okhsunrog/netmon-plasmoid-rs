@@ -73,6 +73,24 @@ PlasmoidItem {
         spacing: Kirigami.Units.smallSpacing
         implicitWidth: Kirigami.Units.gridUnit * 18
 
+        // Error banner
+        Rectangle {
+            visible: monitor.error.length > 0
+            Layout.fillWidth: true
+            implicitHeight: errorLabel.implicitHeight + Kirigami.Units.smallSpacing * 2
+            color: Kirigami.Theme.negativeBackgroundColor
+            radius: Kirigami.Units.smallSpacing
+
+            PlasmaComponents.Label {
+                id: errorLabel
+                anchors.fill: parent
+                anchors.margins: Kirigami.Units.smallSpacing
+                text: "⚠ " + monitor.error
+                color: Kirigami.Theme.negativeTextColor
+                wrapMode: Text.Wrap
+            }
+        }
+
         Kirigami.Heading {
             Layout.alignment: Qt.AlignHCenter
             text: "Network Traffic"
@@ -84,6 +102,9 @@ PlasmoidItem {
             id: plot
             Layout.fillWidth: true
             implicitHeight: Kirigami.Units.gridUnit * 8
+            visible: monitor.error.length === 0
+            enabled: monitor.error.length === 0
+            opacity: enabled ? 1.0 : 0.5
 
             onVisibleChanged: if (visible) requestPaint()
 
@@ -134,6 +155,7 @@ PlasmoidItem {
             Layout.fillWidth: true
             columns: 2
             columnSpacing: Kirigami.Units.largeSpacing
+            visible: monitor.error.length === 0
 
             RowLayout {
                 spacing: Kirigami.Units.smallSpacing

@@ -177,6 +177,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cxx-qt-lib"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7b3de184cff59ad29d657021f933380e584d9b70265247f6a96098bef964211"
+dependencies = [
+ "cxx",
+ "cxx-qt",
+ "cxx-qt-build",
+ "qt-build-utils",
+]
+
+[[package]]
 name = "cxx-qt-macro"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -321,6 +333,7 @@ dependencies = [
  "cxx-gen",
  "cxx-qt",
  "cxx-qt-build",
+ "cxx-qt-lib",
  "sysinfo",
 ]
 
