@@ -42,9 +42,14 @@ PlasmoidItem {
 
     // Panel representation: two compact lines
     compactRepresentation: MouseArea {
+        id: compactRoot
+        implicitWidth: contentCol.implicitWidth + 8
+        Layout.preferredWidth: contentCol.implicitWidth + 8
+        Layout.minimumWidth: contentCol.implicitWidth + 8
         onClicked: root.expanded = !root.expanded
 
         ColumnLayout {
+            id: contentCol
             anchors.centerIn: parent
             spacing: 0
 
