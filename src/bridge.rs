@@ -28,16 +28,18 @@ pub struct NetworkMonitorRust {
 impl qobject::NetworkMonitor {
     fn update(mut self: Pin<&mut Self>) {
         let networks = NETWORKS.get_or_init(|| Mutex::new(Networks::new_with_refreshed_list()));
-        let mut networks = networks.lock().unwrap();
-        networks.refresh(true);
 
-        let iface = default_iface();
-
-        let (rx, tx) = networks
-            .iter()
-            .find(|(name, _)| **name == iface)
-            .map(|(_, data)| (data.received() as i64, data.transmitted() as i64))
-            .unwrap_or((0, 0));
+        let (rx, tx) = match networks.lock() {
+            Ok(mut net) => {
+                net.refresh(true);
+                let iface = default_iface();
+                net.iter()
+                    .find(|(name, _)| **name == iface)
+                    .map(|(_, data)| (data.received() as i64, data.transmitted() as i64))
+                    .unwrap_or((0, 0))
+            }
+            Err(_) => (0, 0),
+        };
 
         self.as_mut().set_rx_speed(rx);
         self.as_mut().set_tx_speed(tx);
