@@ -105,12 +105,24 @@ PlasmoidItem {
             visible: monitor.error.length === 0
             enabled: monitor.error.length === 0
             opacity: enabled ? 1.0 : 0.5
+            // Semi-transparent background adapted to theme
+            property color graphBackground: Qt.rgba(
+                Kirigami.Theme.backgroundColor.r,
+                Kirigami.Theme.backgroundColor.g,
+                Kirigami.Theme.backgroundColor.b,
+                0.15
+            )
 
             onVisibleChanged: if (visible) requestPaint()
 
             Connections {
                 target: root
                 function onRxHistoryChanged() { plot.requestPaint() }
+            }
+
+            Connections {
+                target: plot
+                function onGraphBackgroundChanged() { plot.requestPaint() }
             }
 
             onPaint: {
@@ -122,7 +134,7 @@ PlasmoidItem {
 
                 // Background
                 ctx.clearRect(0, 0, w, h)
-                ctx.fillStyle = Qt.rgba(0, 0, 0, 0.15)
+                ctx.fillStyle = plot.graphBackground
                 ctx.fillRect(0, 0, w, h)
 
                 // Scale to max value in view
