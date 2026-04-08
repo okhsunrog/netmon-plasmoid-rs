@@ -23,21 +23,21 @@ done
 if [ "$RELEASE" -eq 1 ]; then
     echo "Building (release)..."
     cargo build --release
-    SO="target/release/libplasma_applet_rs.so"
+    SO="target/release/libnetmon_plasmoid_rs.so"
 else
     echo "Building (debug)..."
     cargo build
-    SO="target/debug/libplasma_applet_rs.so"
+    SO="target/debug/libnetmon_plasmoid_rs.so"
 fi
 
 # Install QML plugin
 echo "Installing QML plugin → $PLUGIN_DIR"
 mkdir -p "$PLUGIN_DIR"
-cp "$SO" "$PLUGIN_DIR/libplasma_applet_rs.so"
+cp "$SO" "$PLUGIN_DIR/libnetmon_plasmoid_rs.so"
 
 cat > "$PLUGIN_DIR/qmldir" <<EOF
 module org.kde.plasma.rustyapplet
-plugin plasma_applet_rs
+plugin netmon_plasmoid_rs
 EOF
 
 # Ensure plasmashell finds the plugin by adding QML_IMPORT_PATH to its env

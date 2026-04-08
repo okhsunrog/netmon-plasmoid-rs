@@ -1,4 +1,4 @@
-# plasma-applet-rs
+# netmon-plasmoid-rs
 
 A KDE Plasma 6 panel applet showing real-time network traffic (Mbps), written in Rust using [cxx-qt](https://github.com/KDAB/cxx-qt).
 
@@ -29,8 +29,8 @@ sudo pacman -S qt6-base qt6-declarative cmake kpackage
 ## Install
 
 ```sh
-git clone https://github.com/youruser/plasma-applet-rs
-cd plasma-applet-rs
+git clone https://github.com/youruser/netmon-plasmoid-rs
+cd netmon-plasmoid-rs
 bash install.sh --release --restart
 ```
 
@@ -56,7 +56,7 @@ QML2_IMPORT_PATH=~/.local/lib/qt6/qml plasmoidviewer -a org.kde.plasma.rustyappl
 ## Project structure
 
 ```
-plasma-applet-rs/
+netmon-plasmoid-rs/
 ├── src/
 │   ├── lib.rs          # cdylib root; forces Qt plugin symbol into .so
 │   └── bridge.rs       # cxx-qt bridge: defines NetworkMonitor QObject

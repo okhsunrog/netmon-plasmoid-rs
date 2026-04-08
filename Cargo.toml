@@ -1,5 +1,5 @@
 [package]
-name = "plasma-applet-rs"
+name = "netmon-plasmoid-rs"
 version = "0.1.0"
 edition = "2021"
 
