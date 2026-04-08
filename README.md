@@ -6,6 +6,8 @@ This project is intended as a working reference for writing Plasma applets with 
 
 ![Network Monitor applet showing download and upload speeds in the panel](screenshot.png)
 
+![Network Monitor popup with scrolling sparkline plot](screenshot2.png)
+
 ## Features
 
 - Live download / upload speed in the panel compact view
