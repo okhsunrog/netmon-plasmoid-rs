@@ -56,13 +56,13 @@ PlasmoidItem {
             PlasmaComponents.Label {
                 Layout.alignment: Qt.AlignHCenter
                 text: "▼ " + formatSpeed(monitor.rx_speed)
-                font.pixelSize: 10
+                font: Kirigami.Theme.smallFont
                 color: Kirigami.Theme.positiveTextColor
             }
             PlasmaComponents.Label {
                 Layout.alignment: Qt.AlignHCenter
                 text: "▲ " + formatSpeed(monitor.tx_speed)
-                font.pixelSize: 10
+                font: Kirigami.Theme.smallFont
                 color: Kirigami.Theme.neutralTextColor
             }
         }
