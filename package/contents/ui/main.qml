@@ -31,20 +31,25 @@ PlasmoidItem {
     }
 
     // Panel representation: two compact lines
-    compactRepresentation: ColumnLayout {
-        spacing: 0
+    compactRepresentation: MouseArea {
+        onClicked: root.expanded = !root.expanded
 
-        PlasmaComponents.Label {
-            Layout.alignment: Qt.AlignHCenter
-            text: "▼ " + formatSpeed(monitor.rx_speed)
-            font.pixelSize: 10
-            color: Kirigami.Theme.positiveTextColor
-        }
-        PlasmaComponents.Label {
-            Layout.alignment: Qt.AlignHCenter
-            text: "▲ " + formatSpeed(monitor.tx_speed)
-            font.pixelSize: 10
-            color: Kirigami.Theme.neutralTextColor
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: 0
+
+            PlasmaComponents.Label {
+                Layout.alignment: Qt.AlignHCenter
+                text: "▼ " + formatSpeed(monitor.rx_speed)
+                font.pixelSize: 10
+                color: Kirigami.Theme.positiveTextColor
+            }
+            PlasmaComponents.Label {
+                Layout.alignment: Qt.AlignHCenter
+                text: "▲ " + formatSpeed(monitor.tx_speed)
+                font.pixelSize: 10
+                color: Kirigami.Theme.neutralTextColor
+            }
         }
     }
 
