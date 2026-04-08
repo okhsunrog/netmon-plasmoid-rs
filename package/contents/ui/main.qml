@@ -29,6 +29,8 @@ PlasmoidItem {
         }
     }
 
+    onExpandedChanged: if (expanded) plot.requestPaint()
+
     function formatSpeed(bytes) {
         const bits = bytes * 8
         if (bits < 1000)
@@ -78,6 +80,8 @@ PlasmoidItem {
             id: plot
             Layout.fillWidth: true
             implicitHeight: Kirigami.Units.gridUnit * 8
+
+            onVisibleChanged: if (visible) requestPaint()
 
             onPaint: {
                 const ctx = getContext("2d")
