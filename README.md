@@ -11,9 +11,10 @@ This project is intended as a working reference for writing Plasma applets with 
 ## Features
 
 - Live download / upload speed in the panel compact view
-- Popup with labeled download / upload
+- Popup with labeled download / upload and a scrolling sparkline
 - Auto-detects the default network interface (no VPN double-counting)
-- Updates every second via a QML `Timer`
+- Background worker samples `/proc/net/dev` at a fixed 1 Hz cadence, independent of the QML side
+- EMA-smoothed rates, handles counter resets and interface up/down without spurious spikes
 
 ## Prerequisites
 
@@ -103,28 +104,44 @@ cxx-gen = "=0.7.176"      # [build-dependencies]
 #[cxx_qt::bridge]
 pub mod qobject {
     extern "RustQt" {
-        #[qobject]           // generates a QObject C++ class
-        #[qml_element]       // registers it with the QML engine
-        #[qproperty(i64, rx_speed)]  // Q_PROPERTY with getter/setter/notify
-        #[qproperty(i64, tx_speed)]
-        type NetworkMonitor = super::NetworkMonitorRust;  // backed by this Rust struct
+        #[qobject]
+        #[qml_element]
+        #[qproperty(f64, rx_speed)]     // bytes/sec, EMA-smoothed
+        #[qproperty(f64, tx_speed)]
+        #[qproperty(QString, iface)]    // currently monitored interface
+        #[qproperty(bool, link_up)]
+        #[qproperty(QString, error)]
+        type NetworkMonitor = super::NetworkMonitorRust;
 
-        #[qinvokable]        // callable from QML as monitor.update()
-        fn update(self: Pin<&mut Self>);
+        #[qinvokable]
+        fn start(self: Pin<&mut Self>); // spawns the worker thread
     }
+
+    impl cxx_qt::Threading for NetworkMonitor {}
 }
 ```
 
 `cxx-qt-build` in `build.rs` generates the C++ glue code at build time. The Rust struct (`NetworkMonitorRust`) holds the state; the QObject wrapper is managed by Qt.
+
+### Threading model
+
+QML calls `monitor.start()` once in `Component.onCompleted`. That spawns a dedicated worker thread which owns all the sampling logic:
+
+1. Every tick it resolves the default interface from `/proc/net/route` and reads the rx/tx byte counters from `/proc/net/dev` (no `sysinfo`, no allocations on the hot path — the read buffer is reused).
+2. It computes a real bytes-per-second rate from the delta between samples, resetting the baseline on interface change, counter decrease, or iface disappearance so you never see a spurious spike.
+3. An EMA filter (α = 0.4) smooths the rate before it's published.
+4. Updated values are pushed to the QObject via `cxx_qt::Threading::qt_thread().queue(...)`, which marshals the setter calls back onto the GUI thread. Property change signals fire automatically and QML bindings re-evaluate.
+
+The tick cadence is driven by `mpsc::Receiver::recv_timeout`, which means the sleep is cancellable: dropping the `Sender` stored on the QObject (on plasmoid removal, via the Rust struct's `Drop`) wakes the worker immediately and it exits cleanly. No detached threads leak across reloads.
+
+The QML side no longer drives sampling — its `Timer` only samples the already-pushed `rx_speed` / `tx_speed` into a ring buffer for the sparkline. Worker owns the cadence; QML owns the display.
 
 ### QML side
 
 The applet uses Plasma's `PlasmoidItem` as root, which integrates with the panel:
 
 - `compactRepresentation` — what appears in the panel bar
-- `fullRepresentation` — the popup shown when clicked
-
-A QML `Timer` calls `monitor.update()` every second, which reads network stats via `sysinfo` and updates the `rx_speed`/`tx_speed` properties. Property changes automatically trigger QML bindings to re-evaluate.
+- `fullRepresentation` — the popup shown when clicked, including the sparkline Canvas
 
 ## License
 

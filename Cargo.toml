@@ -9,7 +9,6 @@ crate-type = ["cdylib"]
 [dependencies]
 cxx-qt = "0.8.1"
 cxx = "=1.0.176"
-sysinfo = "0.38"
 cxx-qt-lib = "0.8.1"
 
 [build-dependencies]

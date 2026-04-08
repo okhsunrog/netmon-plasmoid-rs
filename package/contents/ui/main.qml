@@ -14,15 +14,16 @@ PlasmoidItem {
 
     NetworkMonitor {
         id: monitor
-        Component.onCompleted: update()
+        Component.onCompleted: start()
     }
 
+    // Worker thread pushes rx_speed/tx_speed; this timer only samples
+    // the current values into the history ring buffer for the graph.
     Timer {
         interval: 1000
         running: true
         repeat: true
         onTriggered: {
-            monitor.update()
             rxHistory = [...rxHistory.slice(1), monitor.rx_speed]
             txHistory = [...txHistory.slice(1), monitor.tx_speed]
         }
