@@ -25,11 +25,10 @@ PlasmoidItem {
             monitor.update()
             rxHistory = [...rxHistory.slice(1), monitor.rx_speed]
             txHistory = [...txHistory.slice(1), monitor.tx_speed]
-            if (root.expanded) plot.requestPaint()
         }
     }
 
-    onExpandedChanged: if (expanded) plot.requestPaint()
+
 
     function formatSpeed(bytes) {
         const bits = bytes * 8
@@ -82,6 +81,11 @@ PlasmoidItem {
             implicitHeight: Kirigami.Units.gridUnit * 8
 
             onVisibleChanged: if (visible) requestPaint()
+
+            Connections {
+                target: root
+                function onRxHistoryChanged() { plot.requestPaint() }
+            }
 
             onPaint: {
                 const ctx = getContext("2d")
