@@ -13,32 +13,28 @@ pub mod qobject {
 }
 
 use core::pin::Pin;
-use std::sync::{Mutex, OnceLock};
+use std::cell::RefCell;
 use sysinfo::Networks;
-
-// sysinfo Networks tracks deltas internally — store it across updates
-static NETWORKS: OnceLock<Mutex<Networks>> = OnceLock::new();
 
 #[derive(Default)]
 pub struct NetworkMonitorRust {
     rx_speed: u64,
     tx_speed: u64,
+    networks: RefCell<Networks>,
 }
 
 impl qobject::NetworkMonitor {
     fn update(mut self: Pin<&mut Self>) {
-        let networks = NETWORKS.get_or_init(|| Mutex::new(Networks::new_with_refreshed_list()));
+        let iface = default_iface();
 
-        let (rx, tx) = match networks.lock() {
-            Ok(mut net) => {
-                net.refresh(true);
-                let iface = default_iface();
-                net.iter()
-                    .find(|(name, _)| **name == iface)
-                    .map(|(_, data)| (data.received(), data.transmitted()))
-                    .unwrap_or((0, 0))
-            }
-            Err(_) => (0, 0),
+        let (rx, tx) = {
+            let mut networks = self.networks.borrow_mut();
+            networks.refresh(true);
+            networks
+                .iter()
+                .find(|(name, _)| **name == iface)
+                .map(|(_, data)| (data.received(), data.transmitted()))
+                .unwrap_or((0, 0))
         };
 
         self.as_mut().set_rx_speed(rx);
