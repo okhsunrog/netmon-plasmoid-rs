@@ -3,8 +3,8 @@ pub mod qobject {
     extern "RustQt" {
         #[qobject]
         #[qml_element]
-        #[qproperty(i64, rx_speed)]
-        #[qproperty(i64, tx_speed)]
+        #[qproperty(u64, rx_speed)]
+        #[qproperty(u64, tx_speed)]
         type NetworkMonitor = super::NetworkMonitorRust;
 
         #[qinvokable]
@@ -21,8 +21,8 @@ static NETWORKS: OnceLock<Mutex<Networks>> = OnceLock::new();
 
 #[derive(Default)]
 pub struct NetworkMonitorRust {
-    rx_speed: i64,
-    tx_speed: i64,
+    rx_speed: u64,
+    tx_speed: u64,
 }
 
 impl qobject::NetworkMonitor {
@@ -35,7 +35,7 @@ impl qobject::NetworkMonitor {
                 let iface = default_iface();
                 net.iter()
                     .find(|(name, _)| **name == iface)
-                    .map(|(_, data)| (data.received() as i64, data.transmitted() as i64))
+                    .map(|(_, data)| (data.received(), data.transmitted()))
                     .unwrap_or((0, 0))
             }
             Err(_) => (0, 0),
