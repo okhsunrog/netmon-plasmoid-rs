@@ -1,0 +1,14 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [{ "Name": "okhsunrog" }],
+        "Category": "System Information",
+        "Description": "Real-time network traffic monitor (Rust + cxx-qt)",
+        "Icon": "network-wireless",
+        "Id": "org.kde.plasma.rustyapplet",
+        "License": "MIT",
+        "Name": "Network Monitor",
+        "Website": ""
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
