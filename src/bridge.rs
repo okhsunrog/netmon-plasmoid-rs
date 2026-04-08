@@ -33,10 +33,10 @@ pub struct NetworkMonitorRust {
 
 impl qobject::NetworkMonitor {
     fn update(mut self: Pin<&mut Self>) {
-        let iface = default_iface();
-
         let (rx, tx, err) = {
-            // SAFETY: cxx-qt guarantees we can safely access our struct
+            // SAFETY: cxx-qt's generated NetworkMonitor wrapper has PhantomPinned, but our
+            // NetworkMonitorRust field is Unpin. We're accessing a mutable reference to the
+            // field contents, which doesn't violate pin invariants.
             let this = unsafe { self.as_mut().get_unchecked_mut() };
 
             match default_iface().and_then(|iface| {
