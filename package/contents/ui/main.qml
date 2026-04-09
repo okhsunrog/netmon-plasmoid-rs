@@ -34,7 +34,7 @@ PlasmoidItem {
     function formatSpeed(bytes) {
         const bits = bytes * 8
         if (bits < 1000)
-            return bits + " bps"
+            return bits.toFixed(0) + " bps"
         else if (bits < 1000 * 1000)
             return (bits / 1000).toFixed(1) + " Kbps"
         else
