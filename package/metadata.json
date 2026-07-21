@@ -5,7 +5,7 @@
         "Category": "System Information",
         "Description": "Real-time network traffic monitor (Rust + cxx-qt)",
         "Icon": "network-wireless",
-        "Id": "org.kde.plasma.rustyapplet",
+        "Id": "org.kde.plasma.netmonplasmoid",
         "License": "MIT",
         "Name": "Network Monitor",
         "Website": ""

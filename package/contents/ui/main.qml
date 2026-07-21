@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.kirigami as Kirigami
-import org.kde.plasma.rustyapplet
+import org.kde.plasma.netmonplasmoid
 
 PlasmoidItem {
     id: root
@@ -17,18 +17,16 @@ PlasmoidItem {
         Component.onCompleted: start()
     }
 
-    // Worker thread pushes rx_speed/tx_speed; this timer only samples
-    // the current values into the history ring buffer for the graph.
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: {
-            rxHistory = [...rxHistory.slice(1), monitor.rx_speed]
-            txHistory = [...txHistory.slice(1), monitor.tx_speed]
+    // The worker bumps `tick` once per sample; appending history on its
+    // changed signal keeps the ring buffer in phase with the worker (no
+    // duplicated or skipped slots, unlike a second free-running timer).
+    Connections {
+        target: monitor
+        function onTickChanged() {
+            root.rxHistory = [...root.rxHistory.slice(1), monitor.rx_speed]
+            root.txHistory = [...root.txHistory.slice(1), monitor.tx_speed]
         }
     }
-
 
 
     function formatSpeed(bytes) {
@@ -44,9 +42,16 @@ PlasmoidItem {
     // Panel representation: two compact lines
     compactRepresentation: MouseArea {
         id: compactRoot
-        implicitWidth: contentCol.implicitWidth + 8
-        Layout.preferredWidth: contentCol.implicitWidth + 8
-        Layout.minimumWidth: contentCol.implicitWidth + 8
+        // Fixed width from the widest realistic reading, so the panel item
+        // doesn't resize (and shift its neighbors) as the digits change.
+        TextMetrics {
+            id: speedMetrics
+            font: Kirigami.Theme.smallFont
+            text: "▼ 999.99 Mbps"
+        }
+        implicitWidth: speedMetrics.width + 8
+        Layout.preferredWidth: speedMetrics.width + 8
+        Layout.minimumWidth: speedMetrics.width + 8
         onClicked: root.expanded = !root.expanded
 
         ColumnLayout {
@@ -113,6 +118,10 @@ PlasmoidItem {
                 Kirigami.Theme.backgroundColor.b,
                 0.15
             )
+            // Bound as properties (not read inside onPaint) so a theme
+            // change triggers a repaint even between data ticks.
+            property color rxColor: Kirigami.Theme.positiveTextColor
+            property color txColor: Kirigami.Theme.neutralTextColor
 
             onVisibleChanged: if (visible) requestPaint()
 
@@ -124,6 +133,8 @@ PlasmoidItem {
             Connections {
                 target: plot
                 function onGraphBackgroundChanged() { plot.requestPaint() }
+                function onRxColorChanged() { plot.requestPaint() }
+                function onTxColorChanged() { plot.requestPaint() }
             }
 
             onPaint: {
@@ -158,8 +169,8 @@ PlasmoidItem {
                     ctx.stroke()
                 }
 
-                drawLine(rx, Kirigami.Theme.positiveTextColor)
-                drawLine(tx, Kirigami.Theme.neutralTextColor)
+                drawLine(rx, plot.rxColor)
+                drawLine(tx, plot.txColor)
             }
         }
 

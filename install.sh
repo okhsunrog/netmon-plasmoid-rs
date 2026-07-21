@@ -2,8 +2,8 @@
 # install.sh — build and install the Rust Network Monitor Plasma applet
 set -e
 
-APPLET_ID="org.kde.plasma.rustyapplet"
-PLUGIN_URI="org/kde/plasma/rustyapplet"
+APPLET_ID="org.kde.plasma.netmonplasmoid"
+PLUGIN_URI="org/kde/plasma/netmonplasmoid"
 QML_USER_DIR="$HOME/.local/lib/qt6/qml"
 PLUGIN_DIR="$QML_USER_DIR/$PLUGIN_URI"
 APPLET_DIR="$HOME/.local/share/plasma/plasmoids/$APPLET_ID"
@@ -36,7 +36,7 @@ mkdir -p "$PLUGIN_DIR"
 cp "$SO" "$PLUGIN_DIR/libnetmon_plasmoid_rs.so"
 
 cat > "$PLUGIN_DIR/qmldir" <<EOF
-module org.kde.plasma.rustyapplet
+module org.kde.plasma.netmonplasmoid
 plugin netmon_plasmoid_rs
 EOF
 
@@ -62,7 +62,7 @@ fi
 echo ""
 echo "Done. To activate:"
 echo "  1. Log out and back in (so plasmashell picks up the new QML path)"
-echo "     — or restart plasmashell: kquitapp6 plasmashell && kstart6 plasmashell"
+echo "     — or restart plasmashell: kquitapp6 plasmashell && kstart plasmashell"
 echo "  2. Right-click the panel → Add Widgets → search 'Network Monitor'"
 echo "  3. Drag it to the panel"
 echo ""

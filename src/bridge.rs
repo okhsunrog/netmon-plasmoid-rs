@@ -13,6 +13,10 @@ pub mod qobject {
         #[qproperty(QString, iface)]
         #[qproperty(bool, link_up)]
         #[qproperty(QString, error)]
+        /// Bumped once per worker sample; QML uses its changed signal to
+        /// append history in phase with the worker even when speeds are
+        /// unchanged (plain value signals are skipped on equal values).
+        #[qproperty(i32, tick)]
         type NetworkMonitor = super::NetworkMonitorRust;
 
         #[qinvokable]
@@ -36,6 +40,7 @@ pub struct NetworkMonitorRust {
     iface: QString,
     link_up: bool,
     error: QString,
+    tick: i32,
     shutdown: Option<Sender<()>>,
 }
 
@@ -76,9 +81,12 @@ fn worker(qt_thread: cxx_qt::CxxQtThread<qobject::NetworkMonitor>, shutdown: mps
             .and_then(|i| read_iface_bytes(&i, &mut proc_buf).map(|b| (i, b)))
         {
             Ok((iface, (rx_bytes, tx_bytes))) => {
-                // Reset baseline on iface change.
+                // Reset baseline and smoothing on iface change so the new
+                // interface doesn't start from the old one's decaying speeds.
                 if current_iface.as_deref() != Some(iface.as_str()) {
                     baseline = None;
+                    smoothed_rx = 0.0;
+                    smoothed_tx = 0.0;
                     current_iface = Some(iface.clone());
                 }
 
@@ -129,6 +137,8 @@ fn worker(qt_thread: cxx_qt::CxxQtThread<qobject::NetworkMonitor>, shutdown: mps
             qobj.as_mut().set_iface(QString::from(&iface_str));
             qobj.as_mut().set_link_up(link_up);
             qobj.as_mut().set_error(QString::from(&err_str));
+            let t = *qobj.as_ref().tick();
+            qobj.as_mut().set_tick(t.wrapping_add(1));
         });
 
         // Sleep the remainder of the interval so cadence doesn't drift.

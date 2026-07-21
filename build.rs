@@ -2,7 +2,7 @@ use cxx_qt_build::{CxxQtBuilder, PluginType, QmlModule};
 
 fn main() {
     CxxQtBuilder::new_qml_module(
-        QmlModule::new("org.kde.plasma.rustyapplet")
+        QmlModule::new("org.kde.plasma.netmonplasmoid")
             .version(1, 0)
             .plugin_type(PluginType::Dynamic),
     )
